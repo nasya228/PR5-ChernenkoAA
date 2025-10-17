@@ -151,3 +151,62 @@ class AuthSystem:
             return new_hash.hex() == stored_hash
         except ValueError:
             return False
+
+class PasswordReset:
+    """Управление сбросом пароля"""
+    
+    def __init__(self):
+        self.reset_tokens = {}
+    
+    def generate_reset_token(self, user_id: int) -> str:
+        """Генерация токена сброса пароля"""
+        token = secrets.token_urlsafe(32)
+        self.reset_tokens[token] = {
+            'user_id': user_id,
+            'created_at': datetime.now(),
+            'used': False
+        }
+        return token
+    
+    def validate_reset_token(self, token: str) -> Optional[int]:
+        """Проверка токена сброса пароля"""
+        token_data = self.reset_tokens.get(token)
+        if not token_data or token_data['used']:
+            return None
+        
+      
+        if datetime.now() - token_data['created_at'] > timedelta(hours=1):
+            del self.reset_tokens[token]
+            return None
+        
+        return token_data['user_id']
+    
+    def mark_token_used(self, token: str) -> None:
+        """Пометить токен как использованный"""
+        if token in self.reset_tokens:
+            self.reset_tokens[token]['used'] = True
+
+
+def example_usage():
+    """Пример использования системы аутентификации"""
+    auth_system = AuthSystem()
+    
+   
+    password = "SecurePassword123!"
+    hashed_password = auth_system.hash_password(password)
+    print(f"Хеш пароля: {hashed_password}")
+    
+   
+    is_valid = auth_system.verify_password("SecurePassword123!", hashed_password)
+    print(f"Пароль верный: {is_valid}")
+    
+  
+    session_id = auth_system.create_session(1, "test_user")
+    print(f"Создана сессия: {session_id}")
+    
+
+    session = auth_system.validate_session(session_id)
+    print(f"Сессия валидна: {bool(session)}")
+
+if __name__ == "__main__":
+    example_usage()
