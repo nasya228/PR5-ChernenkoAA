@@ -2,6 +2,49 @@ import sqlite3
 from typing import Optional, List
 
 class Database:
+        def authenticate_user(self, username: str, password_hash: str) -> Optional[dict]:
+        """Аутентификация пользователя"""
+        if not self.connection:
+            self.connect()
+            
+        cursor = self.connection.cursor()
+        cursor.execute(
+            "SELECT * FROM users WHERE username = ? AND password_hash = ?",
+            (username, password_hash)
+        )
+        row = cursor.fetchone()
+        
+        if row:
+            return {
+                'id': row[0],
+                'username': row[1],
+                'email': row[2],
+                'created_at': row[4]
+            }
+        return None
+
+    def update_user_settings(self, user_id: int, theme: str, language: str, notifications: bool) -> bool:
+        """Обновление настроек пользователя"""
+        if not self.connection:
+            self.connect()
+            
+        cursor = self.connection.cursor()
+        try:
+      
+            cursor.execute("DELETE FROM settings WHERE user_id = ?", (user_id,))
+            
+    
+            cursor.execute(
+                "INSERT INTO settings (user_id, theme, language, notifications) VALUES (?, ?, ?, ?)",
+                (user_id, theme, language, 1 if notifications else 0)
+            )
+            self.connection.commit()
+            print(f"настройки пользователя {user_id} обновлены")
+            return True
+        except sqlite3.Error as e:
+            print(f"ошибка обновления настроек: {e}")
+            return False
+            
     def __init__(self, db_name: str = "app_database.db"):
         self.db_name = db_name
         self.connection: Optional[sqlite3.Connection] = None
