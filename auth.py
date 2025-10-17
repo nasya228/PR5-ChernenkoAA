@@ -5,7 +5,64 @@ from typing import Optional, Dict
 
 class AuthSystem:
     """Система аутентификации пользователей"""
+
+        def create_session(self, user_id: int, username: str) -> str:
+        """
+        Создание сессии пользователя
+        
+        Args:
+            user_id: ID пользователя
+            username: имя пользователя
+            
+        Returns:
+            str: ID сессии
+        """
+        session_id = secrets.token_urlsafe(32)
+        self.sessions[session_id] = {
+            'user_id': user_id,
+            'username': username,
+            'created_at': datetime.now(),
+            'last_activity': datetime.now()
+        }
+        return session_id
     
+    def validate_session(self, session_id: str) -> Optional[dict]:
+        """
+        Проверка валидности сессии
+        
+        Args:
+            session_id: ID сессии
+            
+        Returns:
+            dict: данные сессии или None
+        """
+        session = self.sessions.get(session_id)
+        if not session:
+            return None
+        
+       
+        if datetime.now() - session['created_at'] > timedelta(hours=24):
+            del self.sessions[session_id]
+            return None
+        
+       
+        session['last_activity'] = datetime.now()
+        return session
+    
+    def destroy_session(self, session_id: str) -> bool:
+        """
+        Удаление сессии
+        
+        Args:
+            session_id: ID сессии
+            
+        Returns:
+            bool: True если сессия удалена
+        """
+        if session_id in self.sessions:
+            del self.sessions[session_id]
+            return True
+        return False
     def __init__(self):
         self.sessions = {}
         self.failed_attempts = {}
