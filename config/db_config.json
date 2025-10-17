@@ -1,0 +1,37 @@
+{
+    "database": {
+        "development": {
+            "db_name": "app_development.db",
+            "timeout": 30,
+            "detect_types": 1,
+            "check_same_thread": false
+        },
+        "production": {
+            "db_name": "app_production.db",
+            "timeout": 60,
+            "detect_types": 1,
+            "check_same_thread": true
+        },
+        "test": {
+            "db_name": ":memory:",
+            "timeout": 10,
+            "detect_types": 0,
+            "check_same_thread": false
+        }
+    },
+    "tables": {
+        "users": {
+            "columns": ["id", "username", "email", "password_hash", "created_at"],
+            "indexes": ["username", "email"]
+        },
+        "settings": {
+            "columns": ["user_id", "theme", "language", "notifications"],
+            "foreign_keys": ["user_id REFERENCES users(id)"]
+        }
+    },
+    "backup": {
+        "enabled": true,
+        "interval_hours": 24,
+        "keep_backups": 7
+    }
+}
