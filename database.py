@@ -1,7 +1,67 @@
 import sqlite3
 from typing import Optional, List
+def example_usage():
+    """Пример использования базы данных"""
+    with Database("example.db") as db:
+        db.create_tables()
+        
+     
+        user_id = db.create_user("alex", "alex@example.com", "secure_hash")
+        print(f"Создан пользователь с ID: {user_id}")
+        
+     
+        user = db.get_user_by_id(user_id)
+        print("Данные пользователя:", user)
+        
+        
+        db.update_user_settings(user_id, "dark", "en", True)
+        
+      
+        settings = db.get_user_settings(user_id)
+        print("Настройки пользователя:", settings)
+
+if __name__ == "__main__":
+    example_usage()
 
 class Database:
+            def get_user_settings(self, user_id: int) -> Optional[dict]:
+        """Получение настроек пользователя"""
+        if not self.connection:
+            self.connect()
+            
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT * FROM settings WHERE user_id = ?", (user_id,))
+        row = cursor.fetchone()
+        
+        if row:
+            return {
+                'user_id': row[0],
+                'theme': row[1],
+                'language': row[2],
+                'notifications': bool(row[3])
+            }
+        return None
+
+    def backup_database(self, backup_path: str) -> bool:
+        """Создание резервной копии базы данных"""
+        try:
+            import shutil
+            shutil.copy2(self.db_name, backup_path)
+            print(f"резервная копия создана: {backup_path}")
+            return True
+        except Exception as e:
+            print(f"ошибка создания резервной копии: {e}")
+            return False
+
+    def __enter__(self):
+        """Поддержка контекстного менеджера"""
+        self.connect()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Автоматическое закрытие соединения"""
+        self.close()
+            
         def authenticate_user(self, username: str, password_hash: str) -> Optional[dict]:
         """Аутентификация пользователя"""
         if not self.connection:
