@@ -51,3 +51,43 @@ class UserSettings:
             'language': self.language,
             'notifications': self.notifications
         }
+        def validate_user_data(username: str, email: str, password: str) -> list:
+    """
+    Валидация данных пользователя
+    
+    Returns:
+        list: список ошибок, пустой если ошибок нет
+    """
+    errors = []
+    
+    if len(username) < 3:
+        errors.append("Имя пользователя должно быть не менее 3 символов")
+    
+    if len(username) > 50:
+        errors.append("Имя пользователя должно быть не более 50 символов")
+    
+    if '@' not in email:
+        errors.append("Некорректный email адрес")
+    
+    if len(password) < 6:
+        errors.append("Пароль должен быть не менее 6 символов")
+    
+    return errors
+
+def hash_password(password: str) -> str:
+    """
+    Хеширование пароля (упрощенная версия)
+    
+    В реальном приложении используйте bcrypt или аналоги
+    """
+    import hashlib
+    return hashlib.sha256(password.encode()).hexdigest()
+
+
+if __name__ == "__main__":
+    
+    user = User("test_user", "test@example.com", "hashed_password")
+    print("Создан пользователь:", user.to_dict())
+    
+    settings = UserSettings(1, "dark", "en", False)
+    print("Настройки пользователя:", settings.to_dict())
