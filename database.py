@@ -45,3 +45,52 @@ class Database:
         
         self.connection.commit()
         print("таблицы созданы успешно")
+           
+
+    def create_user(self, username: str, email: str, password_hash: str) -> int:
+        """Создание нового пользователя"""
+        if not self.connection:
+            self.connect()
+            
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)",
+                (username, email, password_hash)
+            )
+            self.connection.commit()
+            print(f"пользователь {username} создан")
+            return cursor.lastrowid
+        except sqlite3.IntegrityError as e:
+            raise DuplicateUserError(f"Пользователь {username} или {email} уже существует") from e
+
+    def get_user_by_id(self, user_id: int) -> Optional[dict]:
+        """Получение пользователя по ID"""
+        if not self.connection:
+            self.connect()
+            
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+        row = cursor.fetchone()
+        
+        if row:
+            return {
+                'id': row[0],
+                'username': row[1],
+                'email': row[2],
+                'password_hash': row[3],
+                'created_at': row[4]
+            }
+        return None
+
+class DatabaseError(Exception):
+    """Базовое исключение для ошибок базы данных"""
+    pass
+
+class UserNotFoundError(DatabaseError):
+    """Пользователь не найден"""
+    pass
+
+class DuplicateUserError(DatabaseError):
+    """Пользователь с таким именем или email уже существует"""
+    pass
