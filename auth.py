@@ -5,7 +5,50 @@ from typing import Optional, Dict
 
 class AuthSystem:
     """Система аутентификации пользователей"""
-
+    def track_failed_attempt(self, username: str) -> bool:
+        """
+        Отслеживание неудачных попыток входа
+        
+        Args:
+            username: имя пользователя
+            
+        Returns:
+            bool: True если аккаунт не заблокирован
+        """
+        if username not in self.failed_attempts:
+            self.failed_attempts[username] = {
+                'count': 0,
+                'first_attempt': datetime.now()
+            }
+        
+        self.failed_attempts[username]['count'] += 1
+        self.failed_attempts[username]['last_attempt'] = datetime.now()
+        
+      
+        if self.failed_attempts[username]['count'] >= 5:
+            time_since_first = datetime.now() - self.failed_attempts[username]['first_attempt']
+            if time_since_first < timedelta(minutes=15):
+                return False
+        
+        return True
+    
+    def reset_failed_attempts(self, username: str) -> None:
+        """Сброс счетчика неудачных попыток"""
+        if username in self.failed_attempts:
+            del self.failed_attempts[username]
+    
+    def is_account_locked(self, username: str) -> bool:
+        """Проверка заблокирован ли аккаунт"""
+        if username not in self.failed_attempts:
+            return False
+        
+        attempts = self.failed_attempts[username]
+        if attempts['count'] >= 5:
+            time_since_first = datetime.now() - attempts['first_attempt']
+            return time_since_first < timedelta(minutes=15)
+        
+        return False
+        
         def create_session(self, user_id: int, username: str) -> str:
         """
         Создание сессии пользователя
