@@ -13,7 +13,7 @@
             <p>адаптивный интерфейс</p>
         </header>
         
-        <nav class="navigation">
+       <nav class="navigation" id="mainNav"></nav>
             <a href="#">главная</a>
             <a href="#">профиль</a>
             <a href="#">настройки</a>
@@ -28,6 +28,21 @@
         </main>
     </div>
     
-    <script src="ui-components.js"></script>
+    <script>
+    const navItems = [
+        { text: 'Главная', link: '#' },
+        { text: 'Профиль', link: '#' },
+        { text: 'Настройки', link: '#' },
+        { text: 'Помощь', link: '#' }
+    ];
+    
+    const navContainer = document.getElementById('mainNav');
+    navItems.forEach(item => {
+        const link = document.createElement('a');
+        link.href = item.link;
+        link.textContent = item.text;
+        navContainer.appendChild(link);
+    });
+</script>
 </body>
 </html>
