@@ -1,5 +1,3 @@
-// Компоненты пользовательского интерфейса
-
 class Button {
     constructor(text, onClick) {
         this.text = text;
@@ -29,5 +27,34 @@ class Modal {
     }
 }
 
-// Экспорт компонентов
+
 export { Button, Modal };
+
+class MobileNavigation {
+    constructor() {
+        this.menuItems = [];
+        this.isExpanded = false;
+    }
+    
+    addMenuItem(text, link) {
+        this.menuItems.push({ text, link });
+    }
+    
+    toggleMenu() {
+        this.isExpanded = !this.isExpanded;
+        console.log('Mobile menu toggled:', this.isExpanded);
+    }
+    
+    render() {
+        return `
+            <nav class="mobile-nav">
+                <button class="menu-toggle" onclick="mobileNav.toggleMenu()">☰</button>
+                ${this.isExpanded ? this.menuItems.map(item => 
+                    `<a href="${item.link}">${item.text}</a>`
+                ).join('') : ''}
+            </nav>
+        `;
+    }
+}
+
+const mobileNav = new MobileNavigation();
